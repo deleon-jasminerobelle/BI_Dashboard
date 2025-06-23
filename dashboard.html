@@ -1,180 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Sales Analytics Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .dashboard-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .dashboard-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 300;
-        }
-
-        .dashboard-header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .dashboard-tabs {
-            display: flex;
-            justify-content: center;
-            margin: 30px 0 20px 0;
-            padding: 0 30px;
-        }
-
-        .tab-btn {
-            padding: 15px 30px;
-            margin: 0 10px;
-            border: none;
-            background: #f8f9fa;
-            cursor: pointer;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            color: #495057;
-        }
-
-        .tab-btn:hover {
-            background: #e9ecef;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
-        }
-
-        .view-section {
-            display: none;
-            padding: 0 30px 30px 30px;
-        }
-
-        .view-section.active {
-            display: block;
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .chart-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .chart-container {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .chart-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .chart-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #2c3e50;
-            text-align: center;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            height: 400px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #007bff;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            .chart-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .dashboard-tabs {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .tab-btn {
-                margin: 5px 0;
-                width: 200px;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -184,9 +15,10 @@
         </div>
 
         <div class="dashboard-tabs">
-            <button class="tab-btn active" onclick="showView('overview')">Overview</button>
-            <button class="tab-btn" onclick="showView('customers')">Customers</button>
-            <button class="tab-btn" onclick="showView('locations')">Locations</button>
+            <button class="tab-btn active" onclick="showView('overview', event)">Overview</button>
+            <button class="tab-btn" onclick="showView('customers', event)">Customers</button>
+            <button class="tab-btn" onclick="showView('locations', event)">Locations</button>
+            <button class="tab-btn" onclick="showView('products', event)">Products</button>
         </div>
 
         <!-- Overview View -->
@@ -299,256 +131,59 @@
                 </div>
             </div>
         </div>
+
+        <!-- Products View -->
+        <div id="products-view" class="view-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">10</div>
+                    <div class="stat-label">Total Products</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">1952 Alpine Renault</div>
+                    <div class="stat-label">Top Revenue Product</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">9,772</div>
+                    <div class="stat-label">Highest Inventory</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">$102</div>
+                    <div class="stat-label">Average Price</div>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Top 5 Products by Revenue</div>
+                    <div class="chart-wrapper">
+                        <canvas id="productRevenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Product Inventory Levels</div>
+                    <div class="chart-wrapper">
+                        <canvas id="productInventoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Price vs Inventory Analysis</div>
+                    <div class="chart-wrapper">
+                        <canvas id="priceInventoryChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Product Category Distribution</div>
+                    <div class="chart-wrapper">
+                        <canvas id="productCategoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <script>
-        // Data from the images
-        const locationData = [
-            { location: "NYC", order_count: 123, total_revenue: 389576.55 },
-            { location: "Madrid", order_count: 120, total_revenue: 385029.86 },
-            { location: "Brickhaven", order_count: 74, total_revenue: 253444.62 },
-            { location: "Singapore", order_count: 75, total_revenue: 252667.64 },
-            { location: "Auckland", order_count: 72, total_revenue: 230397.11 },
-            { location: "Paris", order_count: 74, total_revenue: 230191.16 },
-            { location: "Philadelphia", order_count: 68, total_revenue: 230000 }
-        ];
-
-        const customerData = [
-            { name: "Rachel Ashworth", spent: 106480.33 },
-            { name: "Frédérique Citeaux", spent: 97352.2 },
-            { name: "Jeff Young", spent: 96387.7 },
-            { name: "Mike Gao", spent: 93479.34 },
-            { name: "Daniel Tonini", spent: 93157.66 },
-            { name: "Jean King", spent: 92665.16 },
-            { name: "Brydey Walker", spent: 92364.27 },
-            { name: "Bradley Schuyler", spent: 92264.14 }
-        ];
-
-        const monthlyData = [
-            { month: "2003-01", actual: 116692.77, target: null },
-            { month: "2003-02", actual: 128403.64, target: 175039.155 },
-            { month: "2003-03", actual: 169517.14, target: 175039.155 },
-            { month: "2003-04", actual: 185848.59, target: 175039.155 },
-            { month: "2003-05", actual: 179435.55, target: 278772.885 },
-            { month: "2003-06", actual: 150470.77, target: 278772.885 },
-            { month: "2003-07", actual: 201940.36, target: 278772.885 }
-        ];
-
-        // Tab switching function
-        function showView(viewName) {
-            // Hide all views
-            document.querySelectorAll('.view-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Remove active from all tabs
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected view
-            document.getElementById(viewName + '-view').classList.add('active');
-            
-            // Mark clicked tab as active
-            event.target.classList.add('active');
-        }
-
-        // Chart configurations
-        const chartOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true
-                    }
-                }
-            }
-        };
-
-        // Initialize charts when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Monthly Sales Chart
-            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-            new Chart(monthlyCtx, {
-                type: 'line',
-                data: {
-                    labels: monthlyData.map(d => d.month.substr(5)),
-                    datasets: [{
-                        label: 'Actual Sales',
-                        data: monthlyData.map(d => d.actual),
-                        borderColor: '#007bff',
-                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }, {
-                        label: 'Target Sales',
-                        data: monthlyData.map(d => d.target),
-                        borderColor: '#28a745',
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                        tension: 0.4,
-                        borderDash: [5, 5]
-                    }]
-                },
-                options: {
-                    ...chartOptions,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + (value / 1000).toFixed(0) + 'K';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Location Revenue Chart
-            const locationCtx = document.getElementById('locationChart').getContext('2d');
-            new Chart(locationCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: locationData.map(d => d.location),
-                    datasets: [{
-                        data: locationData.map(d => d.total_revenue),
-                        backgroundColor: [
-                            '#007bff', '#28a745', '#ffc107', '#dc3545',
-                            '#6f42c1', '#fd7e14', '#20c997'
-                        ]
-                    }]
-                },
-                options: {
-                    ...chartOptions,
-                    plugins: {
-                        ...chartOptions.plugins,
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.label + ': $' + context.parsed.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Customers Chart
-            const customersCtx = document.getElementById('customersChart').getContext('2d');
-            new Chart(customersCtx, {
-                type: 'bar',
-                data: {
-                    labels: customerData.map(d => d.name.split(' ')[0]),
-                    datasets: [{
-                        label: 'Total Spending',
-                        data: customerData.map(d => d.spent),
-                        backgroundColor: 'rgba(0, 123, 255, 0.8)',
-                        borderColor: '#007bff',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    ...chartOptions,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + (value / 1000).toFixed(0) + 'K';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Customer Distribution Chart
-            const customerDistCtx = document.getElementById('customerDistChart').getContext('2d');
-            new Chart(customerDistCtx, {
-                type: 'pie',
-                data: {
-                    labels: customerData.map(d => d.name.split(' ')[0]),
-                    datasets: [{
-                        data: customerData.map(d => d.spent),
-                        backgroundColor: [
-                            '#007bff', '#28a745', '#ffc107', '#dc3545',
-                            '#6f42c1', '#fd7e14', '#20c997', '#6c757d'
-                        ]
-                    }]
-                },
-                options: {
-                    ...chartOptions,
-                    plugins: {
-                        ...chartOptions.plugins,
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.label + ': $' + context.parsed.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Location Orders Chart
-            const locationOrdersCtx = document.getElementById('locationOrdersChart').getContext('2d');
-            new Chart(locationOrdersCtx, {
-                type: 'bar',
-                data: {
-                    labels: locationData.map(d => d.location),
-                    datasets: [{
-                        label: 'Order Count',
-                        data: locationData.map(d => d.order_count),
-                        backgroundColor: 'rgba(40, 167, 69, 0.8)',
-                        borderColor: '#28a745',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    ...chartOptions,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            // Location Revenue Distribution Chart
-            const locationRevenueCtx = document.getElementById('locationRevenueChart').getContext('2d');
-            new Chart(locationRevenueCtx, {
-                type: 'polarArea',
-                data: {
-                    labels: locationData.map(d => d.location),
-                    datasets: [{
-                        data: locationData.map(d => d.total_revenue),
-                        backgroundColor: [
-                            'rgba(0, 123, 255, 0.7)', 'rgba(40, 167, 69, 0.7)', 
-                            'rgba(255, 193, 7, 0.7)', 'rgba(220, 53, 69, 0.7)',
-                            'rgba(111, 66, 193, 0.7)', 'rgba(253, 126, 20, 0.7)', 
-                            'rgba(32, 201, 151, 0.7)'
-                        ]
-                    }]
-                },
-                options: {
-                    ...chartOptions,
-                    plugins: {
-                        ...chartOptions.plugins,
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.label + ': $' + context.parsed.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
