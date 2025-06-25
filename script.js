@@ -1,47 +1,117 @@
-// Data from the images
-const locationData = [
-    { location: "NYC", order_count: 123, total_revenue: 389576.55 },
-    { location: "Madrid", order_count: 120, total_revenue: 385029.86 },
-    { location: "Brickhaven", order_count: 74, total_revenue: 253444.62 },
-    { location: "Singapore", order_count: 75, total_revenue: 252667.64 },
-    { location: "Auckland", order_count: 72, total_revenue: 230397.11 },
-    { location: "Paris", order_count: 74, total_revenue: 230191.16 },
-    { location: "Philadelphia", order_count: 68, total_revenue: 230000 }
-];
+// Global variables to store data
+let locationData = [];
+let customerData = [];
+let monthlyData = [];
+let productData = [];
+let productInventoryData = [];
 
-const customerData = [
-    { name: "Rachel Ashworth", spent: 106480.33 },
-    { name: "Frédérique Citeaux", spent: 97352.2 },
-    { name: "Jeff Young", spent: 96387.7 },
-    { name: "Mike Gao", spent: 93479.34 },
-    { name: "Daniel Tonini", spent: 93157.66 },
-    { name: "Jean King", spent: 92665.16 },
-    { name: "Brydey Walker", spent: 92364.27 },
-    { name: "Bradley Schuyler", spent: 92264.14 }
-];
+// Fetch data from PHP endpoints
+async function fetchData() {
+    try {
+        const [
+            locationResponse,
+            customerResponse,
+            monthlyResponse,
+            productResponse,
+            inventoryResponse
+        ] = await Promise.all([
+            fetch('get_data.php?action=location_sales'),
+            fetch('get_data.php?action=top_customers'),
+            fetch('get_data.php?action=revenue_target'),
+            fetch('get_data.php?action=product_sales'),
+            fetch('get_data.php?action=product_inventory')
+        ]);
 
-const monthlyData = [
-    { month: "2003-01", actual: 116692.77, target: null },
-    { month: "2003-02", actual: 128403.64, target: 175039.155 },
-    { month: "2003-03", actual: 169517.14, target: 175039.155 },
-    { month: "2003-04", actual: 185848.59, target: 175039.155 },
-    { month: "2003-05", actual: 179435.55, target: 278772.885 },
-    { month: "2003-06", actual: 150470.77, target: 278772.885 },
-    { month: "2003-07", actual: 201940.36, target: 278772.885 }
-];
+        locationData = await locationResponse.json();
+        customerData = await customerResponse.json();
+        monthlyData = await monthlyResponse.json();
+        productData = await productResponse.json();
+        productInventoryData = await inventoryResponse.json();
 
-const productData = [
-    { name: "1952 Alpine Renault 1300", revenue: 9000, inventory: 7305, price: 98.58, category: "Classic Cars" },
-    { name: "1957 Corvette Convertible", revenue: 8500, inventory: 1249, price: 69.93, category: "Classic Cars" },
-    { name: "American Airlines: MD-11S", revenue: 8200, inventory: 8820, price: 74.03, category: "Planes" },
-    { name: "Boeing X-32A JSF", revenue: 8100, inventory: 6484, price: 32.77, category: "Planes" },
-    { name: "1969 Harley Davidson Ultimate Chopper", revenue: 8000, inventory: 5582, price: 48.81, category: "Motorcycles" },
-    { name: "2002 Suzuki XREO", revenue: 7800, inventory: 9772, price: 66.27, category: "Motorcycles" },
-    { name: "1999 Honda Civic", revenue: 7500, inventory: 9772, price: 64.50, category: "Modern Cars" },
-    { name: "1937 Lincoln Berline", revenue: 7200, inventory: 8693, price: 60.62, category: "Classic Cars" },
-    { name: "1912 Ford Model T Delivery Wagon", revenue: 7000, inventory: 9173, price: 46.91, category: "Vintage Cars" },
-    { name: "1968 Dodge Charger", revenue: 6800, inventory: 9123, price: 75.16, category: "Muscle Cars" }
-];
+        // Update stats with real data
+        updateStats();
+
+        // Initialize all charts with real data
+        initializeCharts();
+
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+// Update dashboard stats with real data
+function updateStats() {
+    // Calculate total revenue
+    const totalRevenue = locationData.reduce((sum, loc) => sum + loc.total_revenue, 0);
+    document.querySelector('.stat-card .stat-value').textContent = '$' + (totalRevenue / 1000000).toFixed(2) + 'M';
+
+    // Active locations
+    document.querySelectorAll('.stat-card')[1].querySelector('.stat-value').textContent = locationData.length;
+
+    // Top customers count
+    document.querySelectorAll('.stat-card')[2].querySelector('.stat-value').textContent = customerData.length;
+
+    // Calculate target achievement for latest month
+    const latestMonth = monthlyData[monthlyData.length - 1];
+    if (latestMonth && latestMonth.target_sales) {
+        const achievement = ((latestMonth.actual_sales / latestMonth.target_sales) * 100).toFixed(1);
+        document.querySelectorAll('.stat-card')[3].querySelector('.stat-value').textContent = achievement + '%';
+    }
+
+    // Update customer stats
+    if (customerData.length > 0) {
+        const topCustomer = customerData[0];
+        const avgSpend = customerData.reduce((sum, c) => sum + c.total_spent, 0) / customerData.length;
+
+        // Update customer view stats
+        setTimeout(() => {
+            const customerStats = document.querySelectorAll('#customers-view .stat-card');
+            if (customerStats.length > 0) {
+                customerStats[0].querySelector('.stat-value').textContent = '$' + (topCustomer.total_spent / 1000).toFixed(1) + 'K';
+                customerStats[1].querySelector('.stat-value').textContent = '$' + (avgSpend / 1000).toFixed(1) + 'K';
+                customerStats[2].querySelector('.stat-value').textContent = topCustomer.full_name.split(' ')[0];
+
+                const topCustomerShare = ((topCustomer.total_spent / totalRevenue) * 100).toFixed(1);
+                customerStats[3].querySelector('.stat-value').textContent = topCustomerShare + '%';
+            }
+        }, 100);
+    }
+
+    // Update location stats
+    if (locationData.length > 0) {
+        const topLocation = locationData[0];
+        const avgOrders = locationData.reduce((sum, loc) => sum + loc.order_count, 0) / locationData.length;
+
+        setTimeout(() => {
+            const locationStats = document.querySelectorAll('#locations-view .stat-card');
+            if (locationStats.length > 0) {
+                locationStats[0].querySelector('.stat-value').textContent = topLocation.location;
+                locationStats[1].querySelector('.stat-value').textContent = '$' + (topLocation.total_revenue / 1000).toFixed(1) + 'K';
+                locationStats[2].querySelector('.stat-value').textContent = Math.round(avgOrders);
+
+                const marketShare = ((topLocation.total_revenue / totalRevenue) * 100).toFixed(1);
+                locationStats[3].querySelector('.stat-value').textContent = marketShare + '%';
+            }
+        }, 100);
+    }
+
+    // Update product stats
+    if (productData.length > 0 && productInventoryData.length > 0) {
+        const topProduct = productData[0];
+        const avgPrice = productInventoryData.reduce((sum, p) => sum + p.price, 0) / productInventoryData.length;
+        const maxInventory = Math.max(...productInventoryData.map(p => p.inventory));
+
+        setTimeout(() => {
+            const productStats = document.querySelectorAll('#products-view .stat-card');
+            if (productStats.length > 0) {
+                productStats[0].querySelector('.stat-value').textContent = productInventoryData.length;
+                productStats[1].querySelector('.stat-value').textContent = topProduct.product;
+                productStats[2].querySelector('.stat-value').textContent = maxInventory.toLocaleString();
+                productStats[3].querySelector('.stat-value').textContent = '$' + avgPrice.toFixed(0);
+            }
+        }, 100);
+    }
+}
 
 // Tab switching function
 function showView(viewName, event) {
@@ -49,15 +119,15 @@ function showView(viewName, event) {
     document.querySelectorAll('.view-section').forEach(section => {
         section.classList.remove('active');
     });
-    
+
     // Remove active from all tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     // Show selected view
     document.getElementById(viewName + '-view').classList.add('active');
-    
+
     // Mark clicked tab as active
     event.target.classList.add('active');
 }
@@ -77,24 +147,24 @@ const chartOptions = {
     }
 };
 
-// Initialize charts when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+// Initialize charts with real data
+function initializeCharts() {
     // Monthly Sales Chart
     const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
     new Chart(monthlyCtx, {
         type: 'line',
         data: {
-            labels: monthlyData.map(d => d.month.substr(5)),
+            labels: monthlyData.map(d => new Date(d.month + '-01').toLocaleDateString('en-US', {month: 'short'})),
             datasets: [{
                 label: 'Actual Sales',
-                data: monthlyData.map(d => d.actual),
+                data: monthlyData.map(d => d.actual_sales),
                 borderColor: '#007bff',
                 backgroundColor: 'rgba(0, 123, 255, 0.1)',
                 tension: 0.4,
                 fill: true
             }, {
                 label: 'Target Sales',
-                data: monthlyData.map(d => d.target),
+                data: monthlyData.map(d => d.target_sales),
                 borderColor: '#28a745',
                 backgroundColor: 'rgba(40, 167, 69, 0.1)',
                 tension: 0.4,
@@ -150,10 +220,10 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(customersCtx, {
         type: 'bar',
         data: {
-            labels: customerData.map(d => d.name.split(' ')[0]),
+            labels: customerData.map(d => d.full_name.split(' ')[0]),
             datasets: [{
                 label: 'Total Spending',
-                data: customerData.map(d => d.spent),
+                data: customerData.map(d => d.total_spent),
                 backgroundColor: 'rgba(0, 123, 255, 0.8)',
                 borderColor: '#007bff',
                 borderWidth: 1
@@ -179,9 +249,9 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(customerDistCtx, {
         type: 'pie',
         data: {
-            labels: customerData.map(d => d.name.split(' ')[0]),
+            labels: customerData.map(d => d.full_name.split(' ')[0]),
             datasets: [{
-                data: customerData.map(d => d.spent),
+                data: customerData.map(d => d.total_spent),
                 backgroundColor: [
                     '#007bff', '#28a745', '#ffc107', '#dc3545',
                     '#6f42c1', '#fd7e14', '#20c997', '#6c757d'
@@ -236,9 +306,9 @@ document.addEventListener('DOMContentLoaded', function() {
             datasets: [{
                 data: locationData.map(d => d.total_revenue),
                 backgroundColor: [
-                    'rgba(0, 123, 255, 0.7)', 'rgba(40, 167, 69, 0.7)', 
+                    'rgba(0, 123, 255, 0.7)', 'rgba(40, 167, 69, 0.7)',
                     'rgba(255, 193, 7, 0.7)', 'rgba(220, 53, 69, 0.7)',
-                    'rgba(111, 66, 193, 0.7)', 'rgba(253, 126, 20, 0.7)', 
+                    'rgba(111, 66, 193, 0.7)', 'rgba(253, 126, 20, 0.7)',
                     'rgba(32, 201, 151, 0.7)'
                 ]
             }]
@@ -263,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(productRevenueCtx, {
         type: 'bar',
         data: {
-            labels: productData.slice(0, 5).map(d => d.name.split(' ').slice(0, 3).join(' ')),
+            labels: productData.slice(0, 5).map(d => d.product.split(' ').slice(0, 3).join(' ')),
             datasets: [{
                 label: 'Revenue ($)',
                 data: productData.slice(0, 5).map(d => d.revenue),
@@ -297,10 +367,10 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(productInventoryCtx, {
         type: 'bar',
         data: {
-            labels: productData.map(d => d.name.split(' ').slice(0, 2).join(' ')),
+            labels: productInventoryData.map(d => d.product.split(' ').slice(0, 2).join(' ')),
             datasets: [{
                 label: 'Inventory Level',
-                data: productData.map(d => d.inventory),
+                data: productInventoryData.map(d => d.inventory),
                 backgroundColor: 'rgba(111, 66, 193, 0.8)',
                 borderColor: '#6f42c1',
                 borderWidth: 1
@@ -328,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             datasets: [{
                 label: 'Products',
-                data: productData.map(d => ({
+                data: productInventoryData.map(d => ({
                     x: d.price,
                     y: d.inventory
                 })),
@@ -365,8 +435,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const product = productData[context.dataIndex];
-                            return product.name + ' - Price: $' + context.parsed.x + ', Inventory: ' + context.parsed.y.toLocaleString();
+                            const product = productInventoryData[context.dataIndex];
+                            return product.product + ' - Price: $' + context.parsed.x + ', Inventory: ' + context.parsed.y.toLocaleString();
                         }
                     }
                 }
@@ -374,21 +444,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Product Category Distribution Chart
-    const categoryData = productData.reduce((acc, product) => {
-        acc[product.category] = (acc[product.category] || 0) + 1;
-        return acc;
-    }, {});
-
+    // Product Category Distribution Chart (simplified since we don't have category data)
     const productCategoryCtx = document.getElementById('productCategoryChart').getContext('2d');
     new Chart(productCategoryCtx, {
         type: 'doughnut',
         data: {
-            labels: Object.keys(categoryData),
+            labels: ['High Value', 'Medium Value', 'Low Value'],
             datasets: [{
-                data: Object.values(categoryData),
+                data: [
+                    productInventoryData.filter(p => p.price > 80).length,
+                    productInventoryData.filter(p => p.price >= 50 && p.price <= 80).length,
+                    productInventoryData.filter(p => p.price < 50).length
+                ],
                 backgroundColor: [
-                    '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'
+                    '#007bff', '#28a745', '#ffc107'
                 ]
             }]
         },
@@ -406,4 +475,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    fetchData();
 });
