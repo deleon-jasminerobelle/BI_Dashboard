@@ -1,189 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sales Analytics Dashboard</title>
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sales Analytics Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
+
 <body>
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1>Sales Analytics Dashboard</h1>
-            <p>Comprehensive business intelligence and performance metrics</p>
-        </div>
-
-        <div class="dashboard-tabs">
-            <button class="tab-btn active" onclick="showView('overview', event)">Overview</button>
-            <button class="tab-btn" onclick="showView('customers', event)">Customers</button>
-            <button class="tab-btn" onclick="showView('locations', event)">Locations</button>
-            <button class="tab-btn" onclick="showView('products', event)">Products</button>
-        </div>
-
-        <!-- Overview View -->
-        <div id="overview-view" class="view-section active">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">$1.69M</div>
-                    <div class="stat-label">Total Revenue</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">7</div>
-                    <div class="stat-label">Active Locations</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">8</div>
-                    <div class="stat-label">Top Customers</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">95.2%</div>
-                    <div class="stat-label">Target Achievement</div>
-                </div>
-            </div>
-
-            <div class="chart-grid">
-                <div class="chart-container">
-                    <div class="chart-title">Monthly Sales Performance</div>
-                    <div class="chart-wrapper">
-                        <canvas id="monthlyChart"></canvas>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Revenue by Location</div>
-                    <div class="chart-wrapper">
-                        <canvas id="locationChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Customers View -->
-        <div id="customers-view" class="view-section">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">$106.5K</div>
-                    <div class="stat-label">Top Customer Spend</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">$95.9K</div>
-                    <div class="stat-label">Average Top 8 Spend</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">Rachel</div>
-                    <div class="stat-label">Best Customer</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">11.5%</div>
-                    <div class="stat-label">Top Customer Share</div>
-                </div>
-            </div>
-
-            <div class="chart-grid">
-                <div class="chart-container">
-                    <div class="chart-title">Top Customers by Spending</div>
-                    <div class="chart-wrapper">
-                        <canvas id="customersChart"></canvas>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Customer Spending Distribution</div>
-                    <div class="chart-wrapper">
-                        <canvas id="customerDistChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Locations View -->
-        <div id="locations-view" class="view-section">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">NYC</div>
-                    <div class="stat-label">Top Location</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">$389.6K</div>
-                    <div class="stat-label">Highest Revenue</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">88</div>
-                    <div class="stat-label">Average Orders</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">23.1%</div>
-                    <div class="stat-label">NYC Market Share</div>
-                </div>
-            </div>
-
-            <div class="chart-grid">
-                <div class="chart-container">
-                    <div class="chart-title">Orders by Location</div>
-                    <div class="chart-wrapper">
-                        <canvas id="locationOrdersChart"></canvas>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Revenue Distribution</div>
-                    <div class="chart-wrapper">
-                        <canvas id="locationRevenueChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Products View -->
-        <div id="products-view" class="view-section">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">10</div>
-                    <div class="stat-label">Total Products</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">1952 Alpine Renault</div>
-                    <div class="stat-label">Top Revenue Product</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">9,772</div>
-                    <div class="stat-label">Highest Inventory</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">$102</div>
-                    <div class="stat-label">Average Price</div>
-                </div>
-            </div>
-
-            <div class="chart-grid">
-                <div class="chart-container">
-                    <div class="chart-title">Top 5 Products by Revenue</div>
-                    <div class="chart-wrapper">
-                        <canvas id="productRevenueChart"></canvas>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Product Inventory Levels</div>
-                    <div class="chart-wrapper">
-                        <canvas id="productInventoryChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="chart-grid">
-                <div class="chart-container">
-                    <div class="chart-title">Price vs Inventory Analysis</div>
-                    <div class="chart-wrapper">
-                        <canvas id="priceInventoryChart"></canvas>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Product Category Distribution</div>
-                    <div class="chart-wrapper">
-                        <canvas id="productCategoryChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+      <h1>Sales Analytics Dashboard</h1>
+      <p>Comprehensive business intelligence and performance metrics</p>
     </div>
-    <script src="script.js"></script>
+
+    <div class="dashboard-tabs">
+      <button class="tab-btn active" onclick="showView('overview', event)">Overview</button>
+      <button class="tab-btn" onclick="showView('customers', event)">Customers</button>
+      <button class="tab-btn" onclick="showView('locations', event)">Locations</button>
+      <button class="tab-btn" onclick="showView('products', event)">Products</button>
+    </div>
+
+    <!-- Overview View -->
+    <div id="overview-view" class="view-section active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">$1.69M</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">7</div>
+          <div class="stat-label">Active Locations</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">8</div>
+          <div class="stat-label">Top Customers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">95.2%</div>
+          <div class="stat-label">Target Achievement</div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-container">
+          <div class="chart-title">Revenue vs Target</div>
+          <div class="chart-wrapper">
+            <canvas id="monthlyChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">Revenue by Location</div>
+          <div class="chart-wrapper">
+            <canvas id="locationChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customers View -->
+    <div id="customers-view" class="view-section">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">$106.5K</div>
+          <div class="stat-label">Top Customer Spend</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">$95.9K</div>
+          <div class="stat-label">Average Top 8 Spend</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">Rachel</div>
+          <div class="stat-label">Best Customer</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">11.5%</div>
+          <div class="stat-label">Top Customer Share</div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-container">
+          <div class="chart-title">Top 10 Customers</div>
+          <div class="chart-wrapper">
+            <canvas id="customersChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">Customer Spending Distribution</div>
+          <div class="chart-wrapper">
+            <canvas id="customerDistChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Locations View -->
+    <div id="locations-view" class="view-section">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">NYC</div>
+          <div class="stat-label">Top Location</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">$389.6K</div>
+          <div class="stat-label">Highest Revenue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">88</div>
+          <div class="stat-label">Average Orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">23.1%</div>
+          <div class="stat-label">NYC Market Share</div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-container">
+          <div class="chart-title">Orders by Location</div>
+          <div class="chart-wrapper">
+            <canvas id="locationOrdersChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">Revenue Distribution</div>
+          <div class="chart-wrapper">
+            <canvas id="locationRevenueChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products View -->
+    <div id="products-view" class="view-section">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">10</div>
+          <div class="stat-label">Total Products</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">1952 Alpine Renault</div>
+          <div class="stat-label">Top Revenue Product</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">9,772</div>
+          <div class="stat-label">Highest Inventory</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">$102</div>
+          <div class="stat-label">Average Price</div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-container">
+          <div class="chart-title">Top 5 Products by Revenue</div>
+          <div class="chart-wrapper">
+            <canvas id="productRevenueChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">Product Inventory Levels</div>
+          <div class="chart-wrapper">
+            <canvas id="productInventoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-container">
+          <div class="chart-title">Price vs Inventory Analysis</div>
+          <div class="chart-wrapper">
+            <canvas id="priceInventoryChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">Product Category Distribution</div>
+          <div class="chart-wrapper">
+            <canvas id="productCategoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
+
 </html>

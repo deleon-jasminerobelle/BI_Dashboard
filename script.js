@@ -149,24 +149,24 @@ const chartOptions = {
 
 // Initialize charts with real data
 function initializeCharts() {
-    // Monthly Sales Chart
-    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-    new Chart(monthlyCtx, {
+    // DEV2 Step 1: Revenue vs Target Chart (replaces Monthly Sales Performance)
+    const revenueTargetCtx = document.getElementById('monthlyChart').getContext('2d');
+    new Chart(revenueTargetCtx, {
         type: 'line',
         data: {
             labels: monthlyData.map(d => new Date(d.month + '-01').toLocaleDateString('en-US', {month: 'short'})),
             datasets: [{
                 label: 'Actual Sales',
                 data: monthlyData.map(d => d.actual_sales),
-                borderColor: '#007bff',
-                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 tension: 0.4,
                 fill: true
             }, {
-                label: 'Target Sales',
+                label: 'Target Sales (50% Growth)',
                 data: monthlyData.map(d => d.target_sales),
-                borderColor: '#28a745',
-                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 tension: 0.4,
                 borderDash: [5, 5]
             }]
@@ -215,12 +215,12 @@ function initializeCharts() {
         }
     });
 
-    // Customers Chart
+    // DEV3 Step 2: Top Customers Chart
     const customersCtx = document.getElementById('customersChart').getContext('2d');
     new Chart(customersCtx, {
         type: 'bar',
         data: {
-            labels: customerData.map(d => d.full_name.split(' ')[0]),
+            labels: customerData.map(d => d.full_name),
             datasets: [{
                 label: 'Total Spending',
                 data: customerData.map(d => d.total_spent),
