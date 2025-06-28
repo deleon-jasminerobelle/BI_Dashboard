@@ -3,11 +3,17 @@ let locationData = [];
 let customerData = [];
 let monthlyData = [];
 let productData = [];
+let chartInstances = {};
 let productInventoryData = [];
+let refreshInterval;
+let isAutoRefreshEnabled = false;
+const REFRESH_INTERVAL_MS = 30000; // 30 seconds
 
 // Fetch data from PHP endpoints
 async function fetchData() {
     try {
+        showLoadingIndicator();
+        
         const [
             locationResponse,
             customerResponse,
@@ -22,6 +28,13 @@ async function fetchData() {
             fetch('get_data.php?action=product_inventory')
         ]);
 
+        // Check if all responses are OK
+        if (!locationResponse.ok) throw new Error(`Location data failed: ${locationResponse.status}`);
+        if (!customerResponse.ok) throw new Error(`Customer data failed: ${customerResponse.status}`);
+        if (!monthlyResponse.ok) throw new Error(`Monthly data failed: ${monthlyResponse.status}`);
+        if (!productResponse.ok) throw new Error(`Product data failed: ${productResponse.status}`);
+        if (!inventoryResponse.ok) throw new Error(`Inventory data failed: ${inventoryResponse.status}`);
+
         locationData = await locationResponse.json();
         customerData = await customerResponse.json();
         monthlyData = await monthlyResponse.json();
@@ -31,13 +44,39 @@ async function fetchData() {
         // Update stats with real data
         updateStats();
 
-        // Initialize all charts with real data
+        // Initialize all charts with real data (this will destroy old charts first)
         initializeCharts();
+        
+        // Hide loading indicator
+        hideLoadingIndicator();
+        
+        // Update last refresh time
+        updateLastRefreshTime();
+        
+        // Clear any error messages
+        hideErrorMessage();
 
     } catch (error) {
         console.error('Error fetching data:', error);
+        hideLoadingIndicator();
+        
+        // Only show canvas error if it's not a fetch error
+        if (error.message.includes('Canvas is already in use')) {
+            showErrorMessage('Chart refresh error - trying to fix...');
+            // Try to destroy charts and retry
+            destroyAllCharts();
+            setTimeout(() => {
+                if (locationData.length > 0) { // Only if we have data
+                    initializeCharts();
+                    hideErrorMessage();
+                }
+            }, 100);
+        } else {
+            showErrorMessage('Failed to fetch data. Retrying in next refresh cycle...');
+        }
     }
 }
+
 
 // Update dashboard stats with real data
 function updateStats() {
@@ -149,9 +188,12 @@ const chartOptions = {
 
 // Initialize charts with real data
 function initializeCharts() {
+    // Destroy existing charts first
+    destroyAllCharts();
+    
     // DEV2 Step 1: Revenue vs Target Chart (replaces Monthly Sales Performance)
     const revenueTargetCtx = document.getElementById('monthlyChart').getContext('2d');
-    new Chart(revenueTargetCtx, {
+    chartInstances.monthlyChart = new Chart(revenueTargetCtx, {
         type: 'line',
         data: {
             labels: monthlyData.map(d => new Date(d.month + '-01').toLocaleDateString('en-US', {month: 'short'})),
@@ -188,7 +230,7 @@ function initializeCharts() {
 
     // Location Revenue Chart
     const locationCtx = document.getElementById('locationChart').getContext('2d');
-    new Chart(locationCtx, {
+    chartInstances.locationChart = new Chart(locationCtx, {
         type: 'doughnut',
         data: {
             labels: locationData.map(d => d.location),
@@ -217,7 +259,7 @@ function initializeCharts() {
 
     // DEV3 Step 2: Top Customers Chart
     const customersCtx = document.getElementById('customersChart').getContext('2d');
-    new Chart(customersCtx, {
+    chartInstances.customersChart = new Chart(customersCtx, {
         type: 'bar',
         data: {
             labels: customerData.map(d => d.full_name),
@@ -246,7 +288,7 @@ function initializeCharts() {
 
     // Customer Distribution Chart
     const customerDistCtx = document.getElementById('customerDistChart').getContext('2d');
-    new Chart(customerDistCtx, {
+    chartInstances.customerDistChart = new Chart(customerDistCtx, {
         type: 'pie',
         data: {
             labels: customerData.map(d => d.full_name.split(' ')[0]),
@@ -275,7 +317,7 @@ function initializeCharts() {
 
     // Location Orders Chart
     const locationOrdersCtx = document.getElementById('locationOrdersChart').getContext('2d');
-    new Chart(locationOrdersCtx, {
+    chartInstances.locationOrdersChart = new Chart(locationOrdersCtx, {
         type: 'bar',
         data: {
             labels: locationData.map(d => d.location),
@@ -299,7 +341,7 @@ function initializeCharts() {
 
     // Location Revenue Distribution Chart
     const locationRevenueCtx = document.getElementById('locationRevenueChart').getContext('2d');
-    new Chart(locationRevenueCtx, {
+    chartInstances.locationRevenueChart = new Chart(locationRevenueCtx, {
         type: 'polarArea',
         data: {
             labels: locationData.map(d => d.location),
@@ -330,7 +372,7 @@ function initializeCharts() {
 
     // Product Revenue Chart
     const productRevenueCtx = document.getElementById('productRevenueChart').getContext('2d');
-    new Chart(productRevenueCtx, {
+    chartInstances.productRevenueChart = new Chart(productRevenueCtx, {
         type: 'bar',
         data: {
             labels: productData.slice(0, 5).map(d => d.product.split(' ').slice(0, 3).join(' ')),
@@ -364,7 +406,7 @@ function initializeCharts() {
 
     // Product Inventory Chart
     const productInventoryCtx = document.getElementById('productInventoryChart').getContext('2d');
-    new Chart(productInventoryCtx, {
+    chartInstances.productInventoryChart = new Chart(productInventoryCtx, {
         type: 'bar',
         data: {
             labels: productInventoryData.map(d => d.product.split(' ').slice(0, 2).join(' ')),
@@ -393,7 +435,7 @@ function initializeCharts() {
 
     // Price vs Inventory Scatter Chart
     const priceInventoryCtx = document.getElementById('priceInventoryChart').getContext('2d');
-    new Chart(priceInventoryCtx, {
+    chartInstances.priceInventoryChart = new Chart(priceInventoryCtx, {
         type: 'scatter',
         data: {
             datasets: [{
@@ -446,7 +488,7 @@ function initializeCharts() {
 
     // Product Category Distribution Chart (simplified since we don't have category data)
     const productCategoryCtx = document.getElementById('productCategoryChart').getContext('2d');
-    new Chart(productCategoryCtx, {
+    chartInstances.productCategoryChart = new Chart(productCategoryCtx, {
         type: 'doughnut',
         data: {
             labels: ['High Value', 'Medium Value', 'Low Value'],
@@ -477,7 +519,132 @@ function initializeCharts() {
     });
 }
 
+function destroyAllCharts() {
+    // Destroy all existing chart instances
+    Object.keys(chartInstances).forEach(chartId => {
+        if (chartInstances[chartId] && typeof chartInstances[chartId].destroy === 'function') {
+            try {
+                chartInstances[chartId].destroy();
+            } catch (error) {
+                console.warn(`Error destroying chart ${chartId}:`, error);
+            }
+        }
+    });
+    
+    // Clear the instances object
+    chartInstances = {};
+}
+
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     fetchData();
+    
+    // Start auto-refresh by default
+    startAutoRefresh();
+    
+    // Add event listeners for refresh buttons
+    const autoRefreshBtn = document.getElementById('autoRefreshBtn');
+    const manualRefreshBtn = document.getElementById('manualRefreshBtn');
+    
+    if (autoRefreshBtn) {
+        autoRefreshBtn.addEventListener('click', toggleAutoRefresh);
+    }
+    
+    if (manualRefreshBtn) {
+        manualRefreshBtn.addEventListener('click', manualRefresh);
+    }
+});
+
+// Auto-refresh functions
+function startAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+    
+    refreshInterval = setInterval(() => {
+        fetchData();
+    }, REFRESH_INTERVAL_MS);
+    
+    isAutoRefreshEnabled = true;
+    updateRefreshButton();
+}
+
+function stopAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+    
+    isAutoRefreshEnabled = false;
+    updateRefreshButton();
+}
+
+function toggleAutoRefresh() {
+    if (isAutoRefreshEnabled) {
+        stopAutoRefresh();
+    } else {
+        startAutoRefresh();
+    }
+}
+
+function manualRefresh() {
+    fetchData();
+}
+
+function updateRefreshButton() {
+    const autoRefreshBtn = document.getElementById('autoRefreshBtn');
+    const manualRefreshBtn = document.getElementById('manualRefreshBtn');
+    
+    if (autoRefreshBtn) {
+        autoRefreshBtn.textContent = isAutoRefreshEnabled ? 'Stop Auto-Refresh' : 'Start Auto-Refresh';
+        autoRefreshBtn.className = isAutoRefreshEnabled ? 'refresh-btn active' : 'refresh-btn';
+    }
+}
+
+function updateLastRefreshTime() {
+    const lastRefreshEl = document.getElementById('lastRefresh');
+    if (lastRefreshEl) {
+        const now = new Date();
+        lastRefreshEl.textContent = `Last updated: ${now.toLocaleTimeString()}`;
+    }
+}
+
+function showLoadingIndicator() {
+    const indicator = document.getElementById('loadingIndicator');
+    if (indicator) {
+        indicator.style.display = 'flex';
+    }
+}
+
+function hideLoadingIndicator() {
+    const indicator = document.getElementById('loadingIndicator');
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
+}
+
+function showErrorMessage(message) {
+    const errorEl = document.getElementById('errorMessage');
+    if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+        setTimeout(() => {
+            errorEl.style.display = 'none';
+        }, 5000);
+    }
+}
+
+function hideErrorMessage() {
+    const errorEl = document.getElementById('errorMessage');
+    if (errorEl) {
+        errorEl.style.display = 'none';
+        errorEl.textContent = '';
+    }
+}
+
+window.addEventListener('beforeunload', function() {
+    destroyAllCharts();
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
 });
