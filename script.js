@@ -7,7 +7,7 @@ let chartInstances = {};
 let productInventoryData = [];
 let refreshInterval;
 let isAutoRefreshEnabled = false;
-const REFRESH_INTERVAL_MS = 30000; // 30 seconds
+const REFRESH_INTERVAL_MS = 60000; // 60 seconds
 
 // Fetch data from PHP endpoints
 async function fetchData() {
