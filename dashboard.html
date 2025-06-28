@@ -16,6 +16,21 @@
       <p>Comprehensive business intelligence and performance metrics</p>
     </div>
 
+    <div class="refresh-controls">
+      <div class="refresh-buttons">
+          <button id="autoRefreshBtn" class="refresh-btn">Stop Auto-Refresh</button>
+          <button id="manualRefreshBtn" class="refresh-btn manual">Refresh Now</button>
+      </div>
+      <div class="refresh-status">
+          <span id="lastRefresh">Last updated: --:--:--</span>
+          <div id="loadingIndicator" class="loading-indicator">
+              <span class="spinner"></span>
+              <span>Updating...</span>
+          </div>
+          <div id="errorMessage" class="error-message"></div>
+      </div>
+    </div>
+
     <div class="dashboard-tabs">
       <button class="tab-btn active" onclick="showView('overview', event)">Overview</button>
       <button class="tab-btn" onclick="showView('customers', event)">Customers</button>
