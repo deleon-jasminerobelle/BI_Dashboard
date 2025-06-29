@@ -409,10 +409,10 @@ function initializeCharts() {
     chartInstances.productInventoryChart = new Chart(productInventoryCtx, {
         type: 'bar',
         data: {
-            labels: productInventoryData.map(d => d.product.split(' ').slice(0, 2).join(' ')),
+            labels: productInventoryData.slice(0, 10).map(d => d.product.split(' ').slice(0, 2).join(' ')),
             datasets: [{
                 label: 'Inventory Level',
-                data: productInventoryData.map(d => d.inventory),
+                data: productInventoryData.slice(0, 10).map(d => d.inventory),
                 backgroundColor: 'rgba(111, 66, 193, 0.8)',
                 borderColor: '#6f42c1',
                 borderWidth: 1
