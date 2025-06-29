@@ -58,9 +58,8 @@ switch($action) {
     case 'product_inventory':
         $query = "SELECT name as product, inventory, price
                  FROM products
-                 WHERE inventory > 0
-                 ORDER BY inventory DESC
-                 LIMIT 10";
+                 WHERE inventory >= 0
+                 ORDER BY inventory ASC";
 
         $result = $conn->query($query);
         $data = array();
